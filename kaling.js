@@ -53,7 +53,7 @@ exports.Kakao = function() {
         }).bind(this)();
 
         (function tiara() {
-            const connection = org.jsoup.Jsoup.connect('https://track.tiara.kakao.com/queen/footsteps');
+            const connection = org.jsoup.Jsoup.connect('https://stat.tiara.kakao.com/track?d=%7B%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.1.15%22%7D%7D');
             connection.ignoreContentType(true);
             const response = connection.execute();
             this.cookies.TIARA = response.cookie('TIARA');
