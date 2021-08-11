@@ -45,7 +45,7 @@ exports.Kakao = function() {
             Object.assign(this.cookies, {
                 _kadu: response.cookie('_kadu'),
                 _kadub: response.cookie('_kadub'),
-                _maldive_oauth_webapp_session: response.cookie('_maldive_oauth_webapp_session')
+                _maldive_oauth_webapp_session_key: response.cookie('_maldive_oauth_webapp_session_key')
             });
             const document = response.parse();
             this.cryptoKey = document.select('input[name=p]').attr('value');
