@@ -9,12 +9,12 @@
 * `crypto.js`는 `kaling.js`가 필요로 하는 모듈입니다
 
 ## Example
-* 기존 카링 모듈과 사용법이 유하사며, 기존 방식 그대로 사용해도 무방합니다.
+* 기존 카링 모듈과 사용법이 유사하며, `Kakao.init();`에 도메인 부분이 추가된걸 제외하면 기존 방식 그대로 사용해도 무방합니다.
 ```javascript
 const kalingModule = require('kaling');
 const Kakao = new kalingModule();
-Kakao.init('Your Javascript Key');
-Kakao.init('email or phone number', 'password');
+Kakao.init('Your Javascript Key', 'Web Platform Domain');
+Kakao.init('Email or Phone Number', 'Password');
 
 Kakao.send(room, template_info, type);
 ```
