@@ -153,7 +153,7 @@ Based on Delta's kaling.js
             .cookies(this.kakao.cookies)
             .ignoreContentType(true)
             .execute();
-        var html = res.body().replace(/\u200b/g, '');
+        var html = (res.body() + "").replace(/\u200b/g, '');
         var rooms = JSON.parse(html);
         this.key = rooms.securityKey;
         for (var n = 0; n < rooms.chats.length; n++) {
