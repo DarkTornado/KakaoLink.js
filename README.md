@@ -1,4 +1,4 @@
-# KakaoLink.js
+# 카카오링크 모듈 for 비공식 카카오톡 봇
 
 * `Delta`님이 만드신 카카오링크 자동 전송 모듈을 기반으로 하는 모듈
 * 카카오가 자꾸 로그인 부분 구조 바꿈;;
@@ -18,3 +18,10 @@ Kakao.init('Email or Phone Number', 'Password');
 
 Kakao.send(room, template_info, type);
 ```
+
+### 기타 변동 사항
+
+#### 2021년 5월 18일
+* 쿠키 이름 변경됨
+#### 2021년 7월 19일
+* 쿠키 생성에 사용되는 URL이 변경됨
