@@ -14,7 +14,7 @@
 const kalingModule = require('kaling');
 const Kakao = new kalingModule();
 Kakao.init('Your Javascript Key', 'Web Platform Domain');
-Kakao.init('Email or Phone Number', 'Password');
+Kakao.login('Email or Phone Number', 'Password');
 
 Kakao.send(room, template_info, type);
 ```
