@@ -28,7 +28,7 @@ exports.Kakao = function() {
         if(typeof password !== 'string') throw new TypeError('invalid password type ' + typeof password);
         
         (function loginManager() {
-            const connection = org.jsoup.Jsoup.connect('https://sharer.kakao.com/talk/friends/picker/link');
+            const connection = org.jsoup.Jsoup.connect('https://accounts.kakao.com/login?continue=https%3A%2F%2Faccounts.kakao.com%2Fweblogin%2Faccount%2Finfo');
             connection.header('User-Agent', this.static.ua);
             connection.data({
                 app_key: this.apiKey,
