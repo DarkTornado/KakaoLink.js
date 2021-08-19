@@ -19,7 +19,7 @@ Kakao.login('Email or Phone Number', 'Password');
 Kakao.send(room, template_info, type);
 ```
 
-### 기타 변동 사항
+## 기타 변동 사항
 
 #### 2021년 5월 18일
 * 쿠키 이름 변경됨
