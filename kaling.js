@@ -16,6 +16,8 @@ Based on Delta's kaling.js
         this.ka = null;
         this.referer = null;
         this.cookies = new java.util.HashMap();
+        this.id = null;
+        this.pw = null;
     };
 
     Kakao.prototype = {};
@@ -35,10 +37,20 @@ Based on Delta's kaling.js
         login.applyData();
         login.authenticate(id, pw);
     };
-    Kakao.prototype.send = function(room, data, type) {
+    Kakao.prototype.send = function(room, data, type, retry) {
         if (type == undefined) type = 'default';
         var sender = new TemplateSender(this);
-        sender.applyData(type, data);
+        var applied = sender.applyData(type, data);
+        if (!applied) {
+            if (!retry) throw new Error('Failed to send KakaoLink. Please login again and retry it.');
+            if (this.id == null) throw new Error('Cannot execute auto login. Data is not enough(id, password).');
+            var login = new LoginManager(this);
+            login.applyData();
+            login.authenticate(this.id, this.pw);
+            sender = new TemplateSender(this);
+            var applied = sender.applyData(type, data);
+            if (!applied) throw new Error('Failed to send KakaoLink although auto login was executed.');
+        }
         sender.prepareRoom(room);
         sender.send();
     };
@@ -79,14 +91,18 @@ Based on Delta's kaling.js
             .ignoreContentType(true).execute().cookie('TIARA'));
     };
     LoginManager.prototype.authenticate = function(id, pw) {
+        if (this.kakao.id == null) {
+            this.kakao.id = CryptoJS.AES.encrypt(id, this.cryptoKey).toString();
+            this.kakao.pw = CryptoJS.AES.encrypt(pw, this.cryptoKey).toString()
+        }
         var res = org.jsoup.Jsoup.connect(this.authenticateURL)
             .header('User-Agent', UserAgent)
             .header('Referer', this.kakao.referer)
             .cookies(this.kakao.cookies)
             .data('os', 'web')
             .data('webview_v', '2')
-            .data('email', CryptoJS.AES.encrypt(id, this.cryptoKey).toString())
-            .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
+            .data('email', this.kakao.id)
+            .data('password', this.kakao.pw)
             .data('continue', decodeURIComponent(this.kakao.referer.split('continue=')[1]))
             .data('third', 'false')
             .data('k', 'true')
@@ -141,8 +157,11 @@ Based on Delta's kaling.js
         }
 
         var html = res.parse();
-        this.template = JSON.parse(html.select('#validatedTalkLink').attr('value'));
+        var template = html.select('#validatedTalkLink').attr('value');
+        if (template == "") return false;
+        this.template = JSON.parse(template);
         this.csrf = html.select('div').last().attr('ng-init').split('\'')[1];
+        return true;
     };
     TemplateSender.prototype.prepareRoom = function(room) {
         var res = org.jsoup.Jsoup.connect(this.roomListURL)
@@ -193,4 +212,3 @@ Based on Delta's kaling.js
     /* Export */
     module.exports = Kakao;
 })();
-
