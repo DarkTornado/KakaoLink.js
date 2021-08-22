@@ -29,13 +29,17 @@ Based on Delta's kaling.js
         this.ka = 'sdk/1.36.6 os/javascript lang/en-US device/Win32 origin/' + encodeURIComponent(domain);
         this.isInitialized = true;
     };
-    Kakao.prototype.login = function(id, pw) {
+    Kakao.prototype.login = function(id, pw, save) {
         if (!this.isInitialized) throw new TypeError('Cannot call login method before initialization.');
         if (typeof id != 'string') throw new TypeError('Invalid id type ' + typeof id);
         if (typeof pw != 'string') throw new TypeError('Invalid password type ' + typeof pw);
         var login = new LoginManager(this);
         login.applyData();
         login.authenticate(id, pw);
+        if (save) {
+            this.id = id;
+            this.pw = pw;
+        }
     };
     Kakao.prototype.send = function(room, data, type, retry) {
         if (type == undefined) type = 'default';
@@ -44,9 +48,7 @@ Based on Delta's kaling.js
         if (!applied) {
             if (!retry) throw new Error('Failed to send KakaoLink. Please login again and retry it.');
             if (this.id == null) throw new Error('Cannot execute auto login. Data is not enough(id, password).');
-            var login = new LoginManager(this);
-            login.applyData();
-            login.authenticate(this.id, this.pw);
+            this.login(this.id, this.pw);
             sender = new TemplateSender(this);
             var applied = sender.applyData(type, data);
             if (!applied) throw new Error('Failed to send KakaoLink although auto login was executed.');
@@ -91,18 +93,14 @@ Based on Delta's kaling.js
             .ignoreContentType(true).execute().cookie('TIARA'));
     };
     LoginManager.prototype.authenticate = function(id, pw) {
-        if (this.kakao.id == null) {
-            this.kakao.id = CryptoJS.AES.encrypt(id, this.cryptoKey).toString();
-            this.kakao.pw = CryptoJS.AES.encrypt(pw, this.cryptoKey).toString()
-        }
         var res = org.jsoup.Jsoup.connect(this.authenticateURL)
             .header('User-Agent', UserAgent)
             .header('Referer', this.kakao.referer)
             .cookies(this.kakao.cookies)
             .data('os', 'web')
             .data('webview_v', '2')
-            .data('email', this.kakao.id)
-            .data('password', this.kakao.pw)
+            .data('email', CryptoJS.AES.encrypt(id, this.cryptoKey).toString())
+            .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
             .data('continue', decodeURIComponent(this.kakao.referer.split('continue=')[1]))
             .data('third', 'false')
             .data('k', 'true')
@@ -212,3 +210,4 @@ Based on Delta's kaling.js
     /* Export */
     module.exports = Kakao;
 })();
+
