@@ -11,14 +11,22 @@
 ## Example
 * 기존 카링 모듈과 사용법이 유사하며, `Kakao.init();`에 도메인 부분이 추가된걸 제외하면 기존 방식 그대로 사용해도 무방합니다.
 ```javascript
-const kalingModule = require('kaling');
+const kalingModule = require('kaling'); //예전처럼 require('kaling').Kakao();로도 가능
 const Kakao = new kalingModule();
 Kakao.init('Your Javascript Key', 'Web Platform Domain');
 Kakao.login('Email or Phone Number', 'Password');
 
 Kakao.send(room, template_info, type);
 ```
+* 로그인 시점에 아이디와 비밀번호를 저장해두고, 로그인 세션 만료시에 자동으로 로그인한 뒤에 전송하는 것을 원한다면, `Kakao.login();` 함수와 `Kakao.send();` 함수의 마지막 인자에 `true`를 추가하면 됩니다.
+```javascript
+const kalingModule = require('kaling');
+const Kakao = new kalingModule();
+Kakao.init('Your Javascript Key', 'Web Platform Domain');
+Kakao.login('Email or Phone Number', 'Password', true); //true로 하지 않으면 아이디&비밀번호 정보를 저장하지 않아요
 
+Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 오류뜰 각이 보이면 알아서 로그인한 뒤에 전송
+```
 ## 기타 변동 사항
 
 ### 2021년 5월 18일
@@ -29,4 +37,4 @@ Kakao.send(room, template_info, type);
 * 로그인에 사용하던 URL이 이상해서 변경
 
 ## To do
-* [ ] 로그인 세션 만료시 자동 로그인 실행 후 재시도
+* [x] 로그인 세션 만료시 자동 로그인 실행 후 재시도
