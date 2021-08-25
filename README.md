@@ -39,3 +39,4 @@ Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 
 
 ## To do
 * [x] 로그인 세션 만료시 자동 로그인 실행 후 재시도
+* [ ] 자동 로그인 없이 세션 만료가 되지 않도록 구현
