@@ -26,7 +26,7 @@ const Kakao = new kalingModule();
 Kakao.init('Your Javascript Key', 'Web Platform Domain');
 Kakao.login('Email or Phone Number', 'Password', true); //true로 하지 않으면 아이디&비밀번호 정보를 저장하지 않아요
 
-Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 오류뜰 각이 보이면 알아서 로그인한 뒤에 전송
+Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 오류가 발생할 각이 보이면 알아서 로그인한 뒤에 전송
 ```
 ## 기타 변동 사항
 
