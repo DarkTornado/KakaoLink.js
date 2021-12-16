@@ -156,7 +156,7 @@ Based on Delta's kaling.js
 
         var html = res.parse();
         var template = html.select('#validatedTalkLink').attr('value');
-        if (template == "") return false;
+        if (template == '') return false;
         this.template = JSON.parse(template);
         this.csrf = html.select('div').last().attr('ng-init').split('\'')[1];
         return true;
@@ -170,7 +170,7 @@ Based on Delta's kaling.js
             .cookies(this.kakao.cookies)
             .ignoreContentType(true)
             .execute();
-        var html = (res.body() + "").replace(/\u200b/g, '');
+        var html = (res.body() + '').replace(/\u200b/g, '');
         var rooms = JSON.parse(html);
         this.key = rooms.securityKey;
         for (var n = 0; n < rooms.chats.length; n++) {
