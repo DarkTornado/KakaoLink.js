@@ -41,7 +41,7 @@ Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 
 
 ## 라이선스
 * [Deep Dark License](https://github.com/DarkTornado/DeepDarkLicense) - Type B
-* 수정 후 소스 공개하기 싫으면 미리 개발자에게 
+* 수정 후 소스 공개하기 싫으면 미리 개발자에게 연락주세용
 
 ## To do
 * [x] 로그인 세션 만료시 자동 로그인 실행 후 재시도
