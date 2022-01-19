@@ -39,6 +39,10 @@ Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 
 ### 2021년 8월 5일
 * 로그인에 사용하던 URL이 이상해서 변경
 
+## 라이선스
+* Deep Dark License - Type B
+
 ## To do
 * [x] 로그인 세션 만료시 자동 로그인 실행 후 재시도
 * [ ] 자동 로그인이 없어도 세션이 만료되지 않도록 구현
+
