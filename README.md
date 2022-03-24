@@ -38,6 +38,9 @@ Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 
 * 쿠키 생성에 사용되는 URL이 변경됨
 ### 2021년 8월 5일
 * 로그인에 사용하던 URL이 이상해서 변경
+### 2022년 3월 24일 경
+* 쿠키 이름이 변경됨
+* 기존 모듈만 영향을 받고, 필자가 만든 모듈은 알아서 잘 딱 깔끔하고 센스있게 처리되는지라 수정 안해도 됨
 
 ## 라이선스
 * [Deep Dark License](https://github.com/DarkTornado/DeepDarkLicense) - Type B

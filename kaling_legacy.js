@@ -113,7 +113,7 @@ exports.Kakao = function() {
             const response = connection.execute();
             if(response.statusCode() === 400) throw new TypeError('invalid template parameter');
             Object.assign(this.cookies, {
-                KSHARER: response.cookie('KSHARER'),
+                PLAY_SESSION: response.cookie('PLAY_SESSION'),
                 using: 'true'
             });
             const document = response.parse();
@@ -151,7 +151,7 @@ exports.Kakao = function() {
             connection.header('App-Key', this.apiKey);
             connection.header('Content-Type', 'application/json;charset=UTF-8');
             connection.cookies({
-                KSHARER: this.cookies.KSHARER,
+                PLAY_SESSION: this.cookies.PLAY_SESSION,
                 TIARA: this.cookies.TIARA,
                 using: this.cookies.using,
                 _kadu: this.cookies._kadu,
