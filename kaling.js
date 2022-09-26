@@ -71,6 +71,8 @@ Based on Delta's kaling.js
     LoginManager.prototype.applyData = function() {
         var res = org.jsoup.Jsoup.connect(this.loginURL)
             .header('User-Agent', UserAgent)
+            .header('referer', 'https://accounts.kakao.com/')
+            .header('Upgrade-Insecure-Requests', '1')
             .data('app_key', this.kakao.key)
             .data('validation_action', 'default')
             .data('validation_params', '{}')
@@ -90,7 +92,7 @@ Based on Delta's kaling.js
         this.cryptoKey = res.parse().select('input[name=p]').attr('value');
         this.kakao.referer = res.url().toString();
         this.kakao.cookies.put('TIARA', org.jsoup.Jsoup.connect(this.tiaraURL)
-            .ignoreContentType(true).execute().cookie('TIARA'));
+            .ignoreContentType(true).header('referer', 'https://accounts.kakao.com/').execute().cookie('TIARA'));
     };
     LoginManager.prototype.authenticate = function(id, pw) {
         var res = org.jsoup.Jsoup.connect(this.authenticateURL)
