@@ -1,6 +1,6 @@
 /*
 카카오링크 자동 전송 모듈
-© 2021 Dark Tornado, All rights reserved.
+© 2021-2022 Dark Tornado, All rights reserved.
 Based on Delta's kaling.js
 */
 
