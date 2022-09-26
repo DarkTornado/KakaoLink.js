@@ -1,6 +1,6 @@
 # 카카오링크 모듈 for 비공식 카카오톡 봇
 
-© 2021 Dark Tornado, All rights reserved.
+© 2021-2022 Dark Tornado, All rights reserved.
 
 * `Delta`님이 만드신 카카오링크 자동 전송 모듈을 기반으로 하는 모듈
 * 카카오가 자꾸 로그인 부분 구조 바꿈;;
@@ -41,12 +41,9 @@ Kakao.send(room, template_info, type, true); //로그인 세션이 만료되어 
 ### 2022년 3월 24일 경
 * 쿠키 이름이 변경됨
 * 기존 모듈만 영향을 받고, 필자가 만든 모듈은 알아서 잘 딱 깔끔하고 센스있게 처리되는지라 수정 안해도 됨
+### 2022년 9월 23일
+* 특정 헤더 누락시 `404` 페이지로 무한 리다이렉트되는 현상 발생
 
 ## 라이선스
 * [Deep Dark License](https://github.com/DarkTornado/DeepDarkLicense) - Type B
 * 수정 후 소스 공개하기 싫으면 미리 개발자에게 연락주세용
-
-## To do
-* [x] 로그인 세션 만료시 자동 로그인 실행 후 재시도
-* [ ] 자동 로그인이 없어도 세션이 만료되지 않도록 구현
-
