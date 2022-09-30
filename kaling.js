@@ -8,6 +8,7 @@ Based on Delta's kaling.js
     const cryptoModule = require('./crypto');
     const CryptoJS = cryptoModule.CryptoJS;
     const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36';
+    const VERSION = '2022.10.01';
 
     /* Main */
     function Kakao() {
@@ -26,7 +27,7 @@ Based on Delta's kaling.js
         if (key.length != 32) throw new TypeError('Invalid api key: ' + key + '.');
         if (typeof domain != 'string') throw new TypeError('Domain must be string.');
         this.key = key;
-        this.ka = 'sdk/1.36.6 os/javascript lang/en-US device/Win32 origin/' + encodeURIComponent(domain);
+        this.ka = 'sdk/1.43.0 os/javascript sdk_type/javascript lang/en-US device/Win32 origin/' + encodeURIComponent(domain);
         this.isInitialized = true;
     };
     Kakao.prototype.login = function(id, pw, save) {
@@ -42,19 +43,24 @@ Based on Delta's kaling.js
         }
     };
     Kakao.prototype.send = function(room, data, type, retry) {
-        if (type == undefined) type = 'default';
+        if (type === undefined) type = 'default';
+        if (data.hasOwnProperty('link_ver')) data.link_ver = '4.0';
         var sender = new TemplateSender(this);
-        var applied = sender.applyData(type, data);
+        var applied = sender.prepareData(type, data);
         if (!applied) {
             if (!retry) throw new Error('Failed to send KakaoLink. Please login again and retry it.');
             if (this.id == null) throw new Error('Cannot execute auto login. Data is not enough(id, password).');
             this.login(this.id, this.pw);
             sender = new TemplateSender(this);
-            var applied = sender.applyData(type, data);
+            var applied = sender.prepareData(type, data);
             if (!applied) throw new Error('Failed to send KakaoLink although auto login was executed.');
         }
-        sender.prepareRoom(room);
+        sender.findRoom(room);
         sender.send();
+    };
+    
+    Kakao.prototype.getVersion = function() {
+        return VERSION;
     };
 
     /* Kakao Web Login */
@@ -125,79 +131,72 @@ Based on Delta's kaling.js
     function TemplateSender(kakao) {
         this.kakao = kakao;
         this.id = null;
-        this.key = null;
+        this.shortKey = null;
+        this.checksum = null;
         this.csrf = null;
         this.template = null;
-        this.pickerURL = 'https://sharer.kakao.com/talk/friends/picker/link';
-        this.roomListURL = 'https://sharer.kakao.com/api/talk/chats';
-        this.senderURL = 'https://sharer.kakao.com/api/talk/message/link';
+        this.roomList = null;
+        this.channelData = null;
+        this.pickerURL = 'https://sharer.kakao.com/picker/link';
+        this.senderURL = 'https://sharer.kakao.com/picker/send';
     };
 
     TemplateSender.prototype = {};
-    TemplateSender.prototype.applyData = function(type, data) {
+    TemplateSender.prototype.prepareData = function(type, data) {
         var res = org.jsoup.Jsoup.connect(this.pickerURL)
             .header('User-Agent', UserAgent)
-            .header('Referer', this.kakao.referer)
+            .header('Upgrade-Insecure-Requests', '1')
             .cookies(this.kakao.cookies)
             .data('app_key', this.kakao.key)
+            .data('ka', this.kakao.ka)
             .data('validation_action', type)
             .data('validation_params', JSON.stringify(data))
-            .data('ka', this.kakao.ka)
-            .data('lcba', '')
             .ignoreHttpErrors(true)
             .method(org.jsoup.Connection.Method.POST)
             .execute();
 
-        if (res.statusCode() == 400) throw new TypeError('Invalid template parameter');
+        var base64 = res.body().match(/serverData = "(.*)"/);
+        if (base64 == null) return false;
+        else base64 = base64[1];
+        var decoded = new java.lang.String(android.util.Base64.decode(base64, android.util.Base64.URL_SAFE)) + '';
+        var json = JSON.parse(decoded).data;
 
+        this.shortKey = json.shortKey;
+        this.csrf = json.csrfToken;
+        this.checksum = json.checksum;
+        this.roomList = json.chats;
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();
         for (var n = 0; n < keys.length; n++) {
             this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
         }
-
-        var html = res.parse();
-        var template = html.select('#validatedTalkLink').attr('value');
-        if (template == '') return false;
-        this.template = JSON.parse(template);
-        this.csrf = html.select('div').last().attr('ng-init').split('\'')[1];
         return true;
     };
-    TemplateSender.prototype.prepareRoom = function(room) {
-        var res = org.jsoup.Jsoup.connect(this.roomListURL)
-            .header('User-Agent', UserAgent)
-            .header('Referer', this.pickerURL)
-            .header('Csrf-Token', this.csrf)
-            .header('App-Key', this.kakao.key)
-            .cookies(this.kakao.cookies)
-            .ignoreContentType(true)
-            .execute();
-        var html = (res.body() + '').replace(/\u200b/g, '');
-        var rooms = JSON.parse(html);
-        this.key = rooms.securityKey;
-        for (var n = 0; n < rooms.chats.length; n++) {
-            if (rooms.chats[n].title == room) {
-                this.id = rooms.chats[n].id;
-                break;
+    TemplateSender.prototype.findRoom = function(room) {
+        var rooms = this.roomList;
+        for (var n = 0; n < rooms.length; n++) {
+            if (rooms[n].title.replace(/\u200b/g, '') == room) {
+                this.channelData = rooms[n];
+                return;
             }
         }
-        if (this.id == null) throw new ReferenceError('Invalid room name ' + room);
+        throw new Error('Invalid room name ' + room);
     };
     TemplateSender.prototype.send = function() {
+        var str = new java.lang.String(JSON.stringify(this.channelData));
+        var receiver = android.util.Base64.encodeToString(str.getBytes(), android.util.Base64.NO_WRAP) + '';
         var res = org.jsoup.Jsoup.connect(this.senderURL)
             .header('User-Agent', UserAgent)
-            .header('Referer', this.pickerURL)
-            .header('Content-Type', 'application/json;charset=UTF-8')
-            .header('Csrf-Token', this.csrf)
-            .header('App-Key', this.kakao.key)
+            .header('origin', 'https://sharer.kakao.com')
+            .header('Referer', this.pickerURL + '?app_key=' + this.kakao.key + '&short_key=' + this.shortKey)
+            .header('Content-Type', 'application/x-www-form-urlencoded')
+            .header('Upgrade-Insecure-Requests', '1')
             .cookies(this.kakao.cookies)
-            .requestBody(JSON.stringify({
-                receiverChatRoomMemberCount: [1],
-                receiverIds: [this.id],
-                receiverType: 'chat',
-                securityKey: this.key,
-                validatedTalkLink: this.template
-            }))
+            .data('app_key', this.kakao.key)
+            .data('short_key', this.shortKey)
+            .data('_csrf', this.csrf)
+            .data('checksum', this.checksum)
+            .data('receiver', receiver)
             .ignoreContentType(true)
             .ignoreHttpErrors(true)
             .method(org.jsoup.Connection.Method.POST)
