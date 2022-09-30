@@ -221,7 +221,7 @@ Based on Delta's kaling.js
         var layout0 = new android.widget.LinearLayout(ctx);
         layout0.setOrientation(1);
         var title = new android.widget.Toolbar(ctx);
-        title.setTitle('kaling.js 모듈 다운로더');
+        title.setTitle('kaling.js 모듈 적용기');
         title.setTitleTextColor(android.graphics.Color.WHITE);
         title.setBackgroundColor(android.graphics.Color.BLACK);
         var margin = new android.widget.LinearLayout.LayoutParams(-1, -2);
@@ -236,7 +236,7 @@ Based on Delta's kaling.js
         var txt = new android.widget.TextView(ctx);
         txt.setText(' 개발자의 깃허브에서 카카오링크를 다운로드 받아서 자동으로 적용하는 기능입니다.\n' +
             ' "채팅 자동응답 봇"에서 사용시 모듈이 바로 적용되고, "메신저봇"에서 사용시 "/내장메모리/Download/" 폴더에 저장됩니다.\n\n' +
-            '현재 카링 모듈 버전 : ' + VERSION);
+            '현재 사용중인 카링 모듈 버전 : ' + VERSION);
         txt.setTextSize(18);
         layout.addView(txt);
 
