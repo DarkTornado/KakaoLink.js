@@ -285,18 +285,10 @@ Based on Delta's kaling.js
     }
 
     function getNewestVersion() {
-        var url = GithubURL + 'kaling.js';
+        var url = GithubURL + 'version.txt';
         var data = getWebText(url);
-        Log.i(url)
-        if (!data.includes('const VERSION = ')) return null;
-        data = data.split('\n');
-        for (var n = 0; n < data.length; n++) {
-            if (data[n].trim().startsWith('const VERSION = ')) {
-                var version = data[n].split('const VERSION = \'')[1].split('\';')[0];
-                return version;
-            }
-        }
-        return null;
+        if (data == '') return null;
+        return data;
     }
 
     function checkBotType(fileName) {
@@ -411,7 +403,7 @@ Based on Delta's kaling.js
         if (typeof com.xfl.msgbot.BuildConfig == 'function') return '메신저봇';
         return '알 수 없음';
     }
-   
+
 
     /* Legacy Module Compatible */
     Kakao.Kakao = function() {
@@ -421,4 +413,3 @@ Based on Delta's kaling.js
     /* Export */
     module.exports = Kakao;
 })();
-
