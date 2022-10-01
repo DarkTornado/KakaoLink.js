@@ -298,7 +298,7 @@ Based on Delta's kaling.js
         } else if (type == '메신저봇') {
             prepareDownload(fileName, 'Download');
         } else {
-            showDialog('기능 사용 불가능', '현재 사용중이신 봇 구동 앱이 무엇인지 식벽하지 못했어요.');
+            showDialog('기능 사용 불가능', '현재 사용중이신 봇 구동 앱이 무엇인지 식별하지 못했어요.');
         }
     }
 
