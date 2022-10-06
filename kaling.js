@@ -67,6 +67,23 @@ Based on Delta's kaling.js
         createModuleDownloader(ctx);
     };
 
+    Kakao.prototype.getRoomInfo = function(room) {
+        var obj = {"link_ver":"4.0","template_object":{"object_type":"feed","button_title":"","content":{"title":"","image_url":"","link":{},"description":""},"buttons":[{"title":"","link":{}}]}};
+        var sender = new TemplateSender(this);
+        var applied = sender.prepareData('default', obj);
+        if (!applied) throw new Error('Cannot use this method before login');
+        var rooms = sender.roomList;
+        for (var n = 0; n < rooms.length; n++) {
+            if (rooms[n].title.replace(/\u200b/g, '') == room) {
+                return {
+                    count: rooms[n].member_count,
+                    isOpenChat: rooms[n].id.length == 97
+                }
+            }
+        }
+    };
+    
+
     /* Kakao Web Login */
     function LoginManager(kakao) {
         this.kakao = kakao;
