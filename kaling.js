@@ -230,7 +230,7 @@ Based on Delta's kaling.js
 
 
     /* Module Downloader */
-    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/';
+    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/release/';
     var ctx;
 
     function createModuleDownloader(_ctx) {
