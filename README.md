@@ -6,7 +6,7 @@
 * 카카오가 자꾸 로그인 부분 구조 바꿈;;
 
 ## How to Use?
-* `kaling.js` 파일과 `crypto.js` 파일을 다운로드받아서 봇 구동 앱의 모듈 폴더에 넣습니다.
+* `release` 폴더 안에 있는 `kaling.js` 파일과 `crypto.js` 파일을 다운로드받아서 봇 구동 앱의 모듈 폴더에 넣습니다.
 * `kaling.js`는 카카오링크 전송 자동화 모듈입니다.
 * `crypto.js`는 `kaling.js`가 필요로 하는 모듈입니다
 * `kaling_lagacy.js`는 `kaling.js`가 기반으로 하는 옛날 카링 모듈입니다. 적용하지 않아도 돼요.
