@@ -8,7 +8,7 @@ Based on Delta's kaling.js
     const cryptoModule = require('./crypto');
     const CryptoJS = cryptoModule.CryptoJS;
     const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36';
-    const VERSION = '2022.10.01.dev';
+    const VERSION = '2022.11.04.dev';
 
     /* Main */
     function Kakao() {
@@ -110,7 +110,7 @@ Based on Delta's kaling.js
             .execute();
 
         if (res.statusCode() == 401) throw new ReferenceError('Invalid api key: ' + key);
-        if (res.statusCode() != 200) throw new Error('Unexpected error on method login');
+        if (res.statusCode() != 200) throw new Error('Unexpected error on method login' + res.statusCode());
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();
         for (var n = 0; n < keys.length; n++) {
@@ -143,7 +143,7 @@ Based on Delta's kaling.js
 
         var result = JSON.parse(res.body());
         if (result.status == -450) throw new ReferenceError('Invalid id or password');
-        if (result.status != 0) throw new Error('Unexpected error on method login');
+        if (result.status != 0) throw new Error('Unexpected error on method login' + result.status);
 
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();

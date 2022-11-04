@@ -8,7 +8,7 @@ Based on Delta's kaling.js
     const cryptoModule = require('./crypto');
     const CryptoJS = cryptoModule.CryptoJS;
     const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36';
-    const VERSION = '2022.10.01.dev';
+    const VERSION = '2022.11.04';
 
     /* Main */
     function Kakao() {
@@ -106,17 +106,19 @@ Based on Delta's kaling.js
             .data('ka', this.kakao.ka)
             .data('lcba', '')
             .ignoreHttpErrors(true)
-            .method(org.jsoup.Connection.Method.POST)
+            .method(org.jsoup.Connection.Method.GET)
             .execute();
 
         if (res.statusCode() == 401) throw new ReferenceError('Invalid api key: ' + key);
-        if (res.statusCode() != 200) throw new Error('Unexpected error on method login');
+        if (res.statusCode() != 200) throw new Error('Unexpected error on method login' + res.statusCode());
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();
         for (var n = 0; n < keys.length; n++) {
             this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
         }
-        this.cryptoKey = res.parse().select('input[name=p]').attr('value');
+        var docs = res.parse();
+        this.cryptoKey = docs.select('input[name=p]').attr('value');
+        this.csrfToken = docs.select('meta[name=csrf-token]').attr('content');
         this.kakao.referer = res.url().toString();
         this.kakao.cookies.put('TIARA', org.jsoup.Jsoup.connect(this.tiaraURL)
             .ignoreContentType(true).header('referer', 'https://accounts.kakao.com/').execute().cookie('TIARA'));
@@ -132,6 +134,8 @@ Based on Delta's kaling.js
             .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
             .data('continue', decodeURIComponent(this.kakao.referer.split('continue=')[1]))
             .data('third', 'false')
+            .data('sdk', 'false')
+            .data('authenticity_token', this.csrfToken)
             .data('k', 'true')
             .ignoreContentType(true)
             .method(org.jsoup.Connection.Method.POST)
@@ -139,7 +143,7 @@ Based on Delta's kaling.js
 
         var result = JSON.parse(res.body());
         if (result.status == -450) throw new ReferenceError('Invalid id or password');
-        if (result.status != 0) throw new Error('Unexpected error on method login');
+        if (result.status != 0) throw new Error('Unexpected error on method login' + result.status);
 
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();
@@ -226,7 +230,7 @@ Based on Delta's kaling.js
 
 
     /* Module Downloader */
-    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/';
+    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/release/';
     var ctx;
 
     function createModuleDownloader(_ctx) {
