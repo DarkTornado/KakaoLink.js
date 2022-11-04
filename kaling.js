@@ -106,7 +106,7 @@ Based on Delta's kaling.js
             .data('ka', this.kakao.ka)
             .data('lcba', '')
             .ignoreHttpErrors(true)
-            .method(org.jsoup.Connection.Method.POST)
+            .method(org.jsoup.Connection.Method.GET)
             .execute();
 
         if (res.statusCode() == 401) throw new ReferenceError('Invalid api key: ' + key);
@@ -116,7 +116,9 @@ Based on Delta's kaling.js
         for (var n = 0; n < keys.length; n++) {
             this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
         }
-        this.cryptoKey = res.parse().select('input[name=p]').attr('value');
+        var docs = res.parse();
+        this.cryptoKey = docs.select('input[name=p]').attr('value');
+        this.csrfToken = docs.select('meta[name=csrf-token]').attr('content');
         this.kakao.referer = res.url().toString();
         this.kakao.cookies.put('TIARA', org.jsoup.Jsoup.connect(this.tiaraURL)
             .ignoreContentType(true).header('referer', 'https://accounts.kakao.com/').execute().cookie('TIARA'));
@@ -132,6 +134,8 @@ Based on Delta's kaling.js
             .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
             .data('continue', decodeURIComponent(this.kakao.referer.split('continue=')[1]))
             .data('third', 'false')
+            .data('sdk', 'false')
+            .data('authenticity_token', this.csrfToken)
             .data('k', 'true')
             .ignoreContentType(true)
             .method(org.jsoup.Connection.Method.POST)
