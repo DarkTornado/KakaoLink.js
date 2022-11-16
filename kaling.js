@@ -149,26 +149,25 @@ Based on Delta's kaling.js
         }
     };
     LoginManager.prototype.authenticate = function(id, pw) {
-        //왜 옛날 방식으로 해야 작동하는 것이지?
-        if (true || this.isNextJS) return this.authenticateLegacy(id, pw);
+        if (!this.isNextJS) return this.authenticateLegacy(id, pw);
         var res = org.jsoup.Jsoup.connect(this.authenticateURL)
             .header('User-Agent', UserAgent)
             .header('Referer', this.kakao.referer)
             .header('Host', 'accounts.kakao.com')
             .header('Content-Type', 'application/json')
             .cookies(this.kakao.cookies)
-            .data('_csrf', this.csrfToken)
-            .data('activeSso', true)
-            .data('loginKey', id)
-            .data('loginUrl', this.kakao.referer)
-            .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
-            .data('staySignedIn', false)
+            .requestBody(JSON.stringify({
+                '_csrf': this.csrfToken,
+                'activeSso': true,
+                'loginKey': id,
+                'loginUrl': this.kakao.referer,
+                'password': CryptoJS.AES.encrypt(pw, this.cryptoKey).toString(),
+                'staySignedIn': false
+            }))
             .ignoreContentType(true)
             .ignoreHttpErrors(true)
             .method(org.jsoup.Connection.Method.POST)
             .execute();
-
-        Log.i(res.statusCode()+', '+res.body());
         
         var result = JSON.parse(res.body());
         if (result.status == -450) throw new ReferenceError('Invalid id or password');
