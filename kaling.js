@@ -27,7 +27,7 @@ Based on Delta's kaling.js
         if (key.length != 32) throw new TypeError('Invalid api key: ' + key + '.');
         if (typeof domain != 'string') throw new TypeError('Domain must be string.');
         this.key = key;
-        this.ka = 'sdk/1.43.0 os/javascript sdk_type/javascript lang/en-US device/Win32 origin/' + encodeURIComponent(domain);
+        this.ka = 'sdk/2.0.1 os/javascript sdk_type/javascript lang/en-US device/Win32 origin/' + encodeURIComponent(domain);
         this.isInitialized = true;
     };
     Kakao.prototype.login = function(id, pw, save) {
@@ -89,9 +89,11 @@ Based on Delta's kaling.js
         this.kakao = kakao;
         this.res = null;
         this.cryptoKey = null;
-        this.loginURL = 'https://accounts.kakao.com/login?continue=https%3A%2F%2Faccounts.kakao.com%2Fweblogin%2Faccount%2Finfo';
-        this.tiaraURL = 'https://stat.tiara.kakao.com/track?d=%7B%22sdk%22%3A%7B%22type%22%3A%22WEB%22%2C%22version%22%3A%221.1.15%22%7D%7D';
-        this.authenticateURL = 'https://accounts.kakao.com/weblogin/authenticate.json';
+        this.loginURL = 'https://accounts.kakao.com/login/';
+        this.tiaraURL = 'https://stat.tiara.kakao.com/track/';
+        this.authenticateURL = 'https://accounts.kakao.com/api/v2/login/authenticate.json';
+        this.authenticateURLLegacy = 'https://accounts.kakao.com/weblogin/authenticate.json';
+        this.isNextJS;
     };
 
     LoginManager.prototype = {};
@@ -100,31 +102,86 @@ Based on Delta's kaling.js
             .header('User-Agent', UserAgent)
             .header('referer', 'https://accounts.kakao.com/')
             .header('Upgrade-Insecure-Requests', '1')
-            .data('app_key', this.kakao.key)
-            .data('validation_action', 'default')
-            .data('validation_params', '{}')
-            .data('ka', this.kakao.ka)
-            .data('lcba', '')
+            .data('app_type', 'web')
+            .data('continue', 'https://accounts.kakao.com/weblogin/account/info')
             .ignoreHttpErrors(true)
             .method(org.jsoup.Connection.Method.GET)
             .execute();
 
         if (res.statusCode() == 401) throw new ReferenceError('Invalid api key: ' + key);
         if (res.statusCode() != 200) throw new Error('Unexpected error on method login' + res.statusCode());
+        
+        this.kakao.referer = res.url().toString();
+        var docs = res.parse();
+        var next = docs.getElementById('__NEXT_DATA__');
+        this.isNextJS = !!next;
+        if (this.isNextJS) { //새로 바뀐 방식
+            var data = JSON.parse(next.data());
+            data = data.props.pageProps.pageContext.commonContext;
+            this.cryptoKey = data.p;
+            this.csrfToken = data._csrf;
+        } else { //기존 방식
+            this.cryptoKey = docs.select('input[name=p]').attr('value');
+            this.csrfToken = docs.select('meta[name=csrf-token]').attr('content');
+        }
+        
         var cookies = res.cookies();
         var keys = cookies.keySet().toArray();
         for (var n = 0; n < keys.length; n++) {
             this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
         }
-        var docs = res.parse();
-        this.cryptoKey = docs.select('input[name=p]').attr('value');
-        this.csrfToken = docs.select('meta[name=csrf-token]').attr('content');
-        this.kakao.referer = res.url().toString();
-        this.kakao.cookies.put('TIARA', org.jsoup.Jsoup.connect(this.tiaraURL)
-            .ignoreContentType(true).header('referer', 'https://accounts.kakao.com/').execute().cookie('TIARA'));
+
+        //tiara
+        res = org.jsoup.Jsoup.connect(this.tiaraURL)
+            .header('User-Agent', UserAgent)
+            .header('referer', 'https://accounts.kakao.com/')
+            //.header('Upgrade-Insecure-Requests', '1')
+            .data('d', '{"sdk":{"type":"WEB","version":"1.1.22"}}')
+            .ignoreContentType(true)
+            .ignoreHttpErrors(true)
+            .method(org.jsoup.Connection.Method.GET)
+            .execute();
+
+        cookies = res.cookies();        
+        var keys = cookies.keySet().toArray();
+        for (var n = 0; n < keys.length; n++) {
+            this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
+        }
     };
     LoginManager.prototype.authenticate = function(id, pw) {
+        //왜 옛날 방식으로 해야 작동하는 것이지?
+        if (true || this.isNextJS) return this.authenticateLegacy(id, pw);
         var res = org.jsoup.Jsoup.connect(this.authenticateURL)
+            .header('User-Agent', UserAgent)
+            .header('Referer', this.kakao.referer)
+            .header('Host', 'accounts.kakao.com')
+            .header('Content-Type', 'application/json')
+            .cookies(this.kakao.cookies)
+            .data('_csrf', this.csrfToken)
+            .data('activeSso', true)
+            .data('loginKey', id)
+            .data('loginUrl', this.kakao.referer)
+            .data('password', CryptoJS.AES.encrypt(pw, this.cryptoKey).toString())
+            .data('staySignedIn', false)
+            .ignoreContentType(true)
+            .ignoreHttpErrors(true)
+            .method(org.jsoup.Connection.Method.POST)
+            .execute();
+
+        Log.i(res.statusCode()+', '+res.body());
+        
+        var result = JSON.parse(res.body());
+        if (result.status == -450) throw new ReferenceError('Invalid id or password');
+        if (result.status != 0) throw new Error('Unexpected error on method login' + result.status);
+
+        var cookies = res.cookies();
+        var keys = cookies.keySet().toArray();
+        for (var n = 0; n < keys.length; n++) {
+            this.kakao.cookies.put(keys[n], cookies.get(keys[n]));
+        }
+    };
+    LoginManager.prototype.authenticateLegacy = function(id, pw) {
+        var res = org.jsoup.Jsoup.connect(this.authenticateURLLegacy)
             .header('User-Agent', UserAgent)
             .header('Referer', this.kakao.referer)
             .cookies(this.kakao.cookies)
@@ -228,7 +285,7 @@ Based on Delta's kaling.js
             .execute();
     };
 
-
+    
     /* Module Downloader */
     const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/release/';
     var ctx;
