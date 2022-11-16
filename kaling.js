@@ -286,7 +286,7 @@ Based on Delta's kaling.js
 
     
     /* Module Downloader */
-    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/release/';
+    const GithubURL = 'https://raw.githubusercontent.com/DarkTornado/KakaoLink.js/main/';
     var ctx;
 
     function createModuleDownloader(_ctx) {
@@ -403,7 +403,7 @@ Based on Delta's kaling.js
     }
 
     function download(fileName, file) {
-        var downloaded = copyFromWeb(GithubURL + fileName + '.js', file);
+        var downloaded = copyFromWeb(GithubURL + 'release/' + fileName + '.js', file);
         if (downloaded) showDialog('모듈 다운로드 완료', '모듈 파일을 다운로드했어요\n위치: ' + file);
         else showDialog('모듈 다운로드 실패', '모듈 파일을 다운로드하지 못했어요 :(');
     }
